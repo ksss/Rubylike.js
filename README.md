@@ -1,7 +1,6 @@
 # Rubylike.js
-*************
 
-## JavaScript use like a Ruby
+JavaScript use like a Ruby
 
 ```javascript
 Rubylike(function(){
@@ -12,9 +11,10 @@ Rubylike(function(){
 	});
 });
 ```
+
 out
-`
+```
 1
 3
 5
-`
+```
