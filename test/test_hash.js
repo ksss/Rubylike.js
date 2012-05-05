@@ -5,6 +5,14 @@ var Rubylike = require('../lib/rubylike.js').Rubylike;
 
 var testCase = [
 
+function classTest () {
+	assert.strictEqual(Hash.class(), 'Function');
+},
+
+function instanceTest () {
+	assert.strictEqual(Hash.new().class(), 'Hash');
+},
+
 function newTest () {
 	assert.deepEqual(Hash.new(), {});
 	assert.deepEqual(Hash.new(nil), {});
@@ -27,6 +35,29 @@ function eachTest () {
 		ret.push(i);
 	});
 	assert.deepEqual(ret, [[2, ["some"]], ["a", 100], ["c", "c"]]);
+	assert.deepEqual(hash, {"a": 100, 2: ["some"], "c": "c"});
+},
+
+function firstTest () {
+	var hash = Hash.new({"a":1, "b":2});
+	assert.deepEqual(hash.first(), ["a", 1]);
+	assert.deepEqual(hash, {"a":1, "b":2});
+},
+
+function shiftTest () {
+	var hash = Hash.new({"a":1, "b":2});
+	assert.deepEqual(hash.shift(), ["a", 1]);
+	assert.deepEqual(hash, {"b":2});
+},
+
+function injectTest () {
+	var hash = Hash.new({"a":1, "b":2, "c":3});
+	var i = 100;
+	var ret = hash.inject(function (sum, i) {
+		return [sum[0] + i[0], sum[1] + i[1]];
+	});
+	assert.deepEqual(ret, ["abc", 6]);
+	assert.strictEqual(i, 100);
 },
 
 ];

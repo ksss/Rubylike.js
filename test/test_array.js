@@ -5,8 +5,15 @@ var Rubylike = require('../lib/rubylike.js').Rubylike;
 
 var testCase = [
 
+function classTest () {
+	assert.strictEqual(Array.class(), 'Function');
+},
+
+function instanceTest () {
+	assert.strictEqual(Array.new().class(), 'Array');
+},
+
 function newTest () {
-	assert.strictEqual(nil, null, 'can use nil same null');
 	assert.deepEqual(Array.new(), new Array());
 	assert.deepEqual(Array.new(3), [nil, nil, nil]);
 	assert.deepEqual(Array.new([1,2,3]), [1,2,3]);
@@ -24,9 +31,9 @@ function pushTest () {
 
 function popTest () {
 	var array = [1,2,3,4,5,6,7,8,9];
-	assert.equal(array.pop(2)._pop(), 9);
+	assert.strictEqual(array.pop(2)._pop(), 9);
 	assert.deepEqual(array, [1,2,3,4,5,6,7]);
-	assert.equal(array.pop(), 7);
+	assert.strictEqual(array.pop(), 7);
 	assert.deepEqual(array, [1,2,3,4,5,6]);
 	assert.deepEqual(array.pop(0), []);
 	assert.deepEqual(array, [1,2,3,4,5,6]);
@@ -52,6 +59,22 @@ function eachTest () {
 	assert.throws(function(){
 		[]._each(function(){});
 	});
+},
+
+function firstTest () {
+	var array = [1,2,3]
+	assert.strictEqual(array.first(), 1);
+	assert.deepEqual(array, [1,2,3]);
+},
+
+function injectTest () {
+	var array = [1,2,3,4,5];
+	var i = 100;
+	var ret = array.inject(function (sum, i) {
+		return sum * i;
+	});
+	assert.strictEqual(ret, 120);
+	assert.strictEqual(i, 100);
 },
 
 ];
