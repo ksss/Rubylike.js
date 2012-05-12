@@ -69,11 +69,13 @@ function firstTest () {
 
 function injectTest () {
 	var array = [1,2,3,4,5];
+	var sum = 12345;
 	var i = 100;
 	var ret = array.inject(function (sum, i) {
 		return sum * i;
 	});
 	assert.strictEqual(ret, 120);
+	assert.strictEqual(sum, 12345);
 	assert.strictEqual(i, 100);
 },
 
@@ -90,6 +92,8 @@ Array.prototype.foo = function () {return [3,2,1]};
 Array.prototype._foo = function () {return [3,2,1]};
 
 // inside Rubylike test
+assert.ok(typeof Rubylike === 'function');
+assert.throws(function(){ Rubylike() });
 Rubylike(function(r){
 	for (var i = 0, len = testCase.length; i < len; i += 1) {
 		testCase[i]();
@@ -104,8 +108,4 @@ for (var i = 0, len = testCase.length; i < len; i += 1) {
 	assert.throws(function(){
 		testCase[i]();
 	});
-}
-
-function p () {
-	console.log(Array.prototype.slice.call(arguments));
 }

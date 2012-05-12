@@ -14,7 +14,8 @@ function instanceTest () {
 },
 
 function newTest () {
-	assert.deepEqual(Hash.new(), {});
+	assert.ok(Hash.new() instanceof Hash);
+	assert.deepEqual(Hash.new(), new Object());
 	assert.deepEqual(Hash.new(nil), {});
 	assert.deepEqual(Hash.new(10), {});
 	assert.deepEqual(Hash.new("a"), {});
@@ -31,11 +32,13 @@ function to_aTest () {
 function eachTest () {
 	var hash = Hash.new({"a": 100, 2: ["some"], "c": "c"});
 	var ret = [];
+	var i = 999;
 	hash.each(function(i){
 		ret.push(i);
 	});
 	assert.deepEqual(ret, [[2, ["some"]], ["a", 100], ["c", "c"]]);
 	assert.deepEqual(hash, {"a": 100, 2: ["some"], "c": "c"});
+	assert.strictEqual(i, 999);
 },
 
 function firstTest () {
@@ -52,11 +55,13 @@ function shiftTest () {
 
 function injectTest () {
 	var hash = Hash.new({"a":1, "b":2, "c":3});
+	var sum = 12345;
 	var i = 100;
 	var ret = hash.inject(function (sum, i) {
 		return [sum[0] + i[0], sum[1] + i[1]];
 	});
 	assert.deepEqual(ret, ["abc", 6]);
+	assert.strictEqual(sum, 12345);
 	assert.strictEqual(i, 100);
 },
 
@@ -68,7 +73,6 @@ for (var i = 0, len = testCase.length; i < len; i += 1) {
 		testCase[i]();
 	});
 }
-
 // inside Rubylike test
 Rubylike(function(r){
 	for (var i = 0, len = testCase.length; i < len; i += 1) {
@@ -81,10 +85,4 @@ for (var i = 0, len = testCase.length; i < len; i += 1) {
 	assert.throws(function(){
 		testCase[i]();
 	});
-}
-
-var hash = {"a": 100, 2: ["some"], "c": "c"};
-
-function p () {
-	console.log(Array.prototype.slice.call(arguments));
 }
