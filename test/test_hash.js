@@ -33,12 +33,13 @@ function eachTest () {
 	var hash = Hash.new({"a": 100, 2: ["some"], "c": "c"});
 	var ret = [];
 	var i = 999;
-	hash.each(function(i){
+	var each_ret = hash.each(function(i){
 		ret.push(i);
 	});
 	assert.deepEqual(ret, [[2, ["some"]], ["a", 100], ["c", "c"]]);
 	assert.deepEqual(hash, {"a": 100, 2: ["some"], "c": "c"});
 	assert.strictEqual(i, 999);
+	assert.deepEqual(each_ret, hash);
 },
 
 function firstTest () {
@@ -63,6 +64,11 @@ function injectTest () {
 	assert.deepEqual(ret, ["abc", 6]);
 	assert.strictEqual(sum, 12345);
 	assert.strictEqual(i, 100);
+},
+
+function keysTest () {
+	var hash = Hash.new({"b":1, "a":2, "c":{"d":3}});
+	assert.deepEqual(hash.keys(), ["b","a","c"]);
 },
 
 ];
