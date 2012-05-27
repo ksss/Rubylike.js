@@ -20,6 +20,10 @@ function newTest () {
 	assert.throws(function(){ String.new([1,2,3]) });
 },
 
+function eqlTest () {
+	assert.ok('string'.eql('string'));
+},
+
 ];
 
 function p () {

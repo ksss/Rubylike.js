@@ -44,6 +44,21 @@ function popTest () {
 	assert.deepEqual(array, []);
 },
 
+function shiftTest () {
+	var array = [1,2,3,4,5,6,7,8,9];
+	assert.strictEqual(array.shift(), 1);
+	assert.deepEqual(array, [2,3,4,5,6,7,8,9]);
+	assert.deepEqual(array.shift(1), [2]);
+	assert.deepEqual(array, [3,4,5,6,7,8,9]);
+	assert.deepEqual(array.shift(3), [3,4,5]);
+	assert.deepEqual(array, [6,7,8,9]);
+	assert.deepEqual(array.shift(10), [6,7,8,9]);
+	assert.deepEqual(array, []);
+	assert.strictEqual(array.shift(), null);
+	assert.deepEqual(array.shift(1), []);
+	assert.deepEqual(array, []);
+},
+
 function eachTest () {
 	var i, ret, array;
 	i = 0;
@@ -77,6 +92,11 @@ function injectTest () {
 	assert.strictEqual(ret, 120);
 	assert.strictEqual(sum, 12345);
 	assert.strictEqual(i, 100);
+},
+
+function eqlTest () {
+	var array = [1,2,3,4,-5];
+	assert.ok(array.eql([1,2,3,4,-5]));
 },
 
 ];

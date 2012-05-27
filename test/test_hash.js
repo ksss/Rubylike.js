@@ -21,6 +21,13 @@ function newTest () {
 	assert.deepEqual(Hash.new("a"), {});
 	assert.deepEqual(Hash.new(/\d/), {});
 	assert.deepEqual(Hash.new({"foo":3}), {"foo":3});
+	assert.deepEqual(Hash.new({"foo":3}).class(), 'Hash');
+	assert.deepEqual(Hash.new({"foo":{"bar":2}})["foo"].class(), 'Hash');
+	assert.deepEqual(Hash.new({"foo":["bar",2]})["foo"].class(), 'Array');
+	assert.deepEqual(Hash.new({"foo":(new String('a'))})["foo"].class(), 'String');
+	assert.deepEqual(Hash.new({"foo":(new Number('a'))})["foo"].class(), 'Number');
+	assert.deepEqual(Hash.new({"foo":(new RegExp('a'))})["foo"].class(), 'RegExp');
+	assert.deepEqual(Hash.new({"foo":(new Function('a'))})["foo"].class(), 'Function');
 },
 
 function to_aTest () {
@@ -29,27 +36,55 @@ function to_aTest () {
 	assert.deepEqual(hash, {"a": 100, 2: ["some"], "c": "c"});
 },
 
+function to_hashTest () {
+	var hash = Hash.new({"a":100, 2:["some"], "c":"c"});
+	assert.deepEqual(hash.to_hash(), {"a":100, 2:["some"], "c":"c"});
+	assert.deepEqual(hash, {"a":100, 2:["some"], "c":"c"});
+},
+
 function eachTest () {
-	var hash = Hash.new({"a": 100, 2: ["some"], "c": "c"});
+	var hash = Hash.new({"a":100, 2:["some"], "c":"c"});
 	var ret = [];
 	var i = 999;
 	var each_ret = hash.each(function(i){
 		ret.push(i);
 	});
-	assert.deepEqual(ret, [[2, ["some"]], ["a", 100], ["c", "c"]]);
-	assert.deepEqual(hash, {"a": 100, 2: ["some"], "c": "c"});
+	assert.deepEqual(ret, [[2,["some"]], ["a",100], ["c","c"]]);
+	assert.deepEqual(hash, {"a":100, 2:["some"], "c":"c"});
+	assert.strictEqual(i, 999);
+	assert.deepEqual(each_ret, hash);
+
+	ret = [];
+	each_ret = hash.each(function(key, value){
+		ret.push([key, value]);
+	});
+	assert.deepEqual(ret, [[2,["some"]], ["a",100], ["c","c"]]);
+	assert.deepEqual(hash, {"a":100, 2:["some"], "c":"c"});
+	assert.strictEqual(i, 999);
+	assert.deepEqual(each_ret, hash);
+},
+
+function each_keyTest () {
+	var hash = Hash.new({"a":100, 2:["some"], "c":"c"});
+	var ret = [];
+	var i = 999;
+	var each_ret = hash.each_key(function(i){
+		ret.push(i);
+	});
+	assert.deepEqual(ret, ["2", "a", "c"]);
+	assert.deepEqual(hash, {"a":100, 2:["some"], "c":"c"});
 	assert.strictEqual(i, 999);
 	assert.deepEqual(each_ret, hash);
 },
 
 function firstTest () {
-	var hash = Hash.new({"a":1, "b":2});
+	var hash = Hash.new({"a":1,"b":2});
 	assert.deepEqual(hash.first(), ["a", 1]);
 	assert.deepEqual(hash, {"a":1, "b":2});
 },
 
 function shiftTest () {
-	var hash = Hash.new({"a":1, "b":2});
+	var hash = Hash.new({"a":1,"b":2});
 	assert.deepEqual(hash.shift(), ["a", 1]);
 	assert.deepEqual(hash, {"b":2});
 },
@@ -66,9 +101,33 @@ function injectTest () {
 	assert.strictEqual(i, 100);
 },
 
+function lengthTest () {
+	var hash = Hash.new({"b":1, 1:"b", "c":{"d":{"e":{"f":5}}}});
+	assert.ok(hash.length(), 3);
+},
+
+function sizeTest () {
+	var hash = Hash.new({"b":1, 1:"b", "c":{"d":{"e":{"f":5}}}});
+	assert.ok(hash.size(), 3);
+},
+
+function eqlTest () {
+	var hash = Hash.new({"b":1, 1:"b", "c":{"d":{"e":{"f":5}}}});
+	assert.ok(hash.eql({"b":1, 1:"b", "c":{"d":{"e":{"f":5}}}}));
+	assert.ok(hash.eql(Hash.new({"b":1, 1:"b", "c":{"d":{"e":{"f":5}}}})));
+	assert.ok(!hash.eql(Hash.new({"b":1, 1:"b", "c":{"d":{"e":{"f":6}}}})));
+},
+
 function keysTest () {
-	var hash = Hash.new({"b":1, "a":2, "c":{"d":3}});
-	assert.deepEqual(hash.keys(), ["b","a","c"]);
+	var hash = Hash.new({"b":1, 1:"b", "c":{"d":{"e":{"f":5}}}});
+	assert.deepEqual(hash.keys(), ["1","b","c"]);
+},
+
+function keyTest () {
+	var hash = Hash.new({"b":1, 1:"b", "c":{"d":{"e":{"f":5}}}});
+	assert.deepEqual(hash.key(1), "b");
+	assert.deepEqual(hash.key("b"), 1);
+	assert.deepEqual(hash.key({"d":{"e":{"f":5}}}), "c");
 },
 
 ];
