@@ -130,6 +130,12 @@ function keyTest () {
 	assert.deepEqual(hash.key({"d":{"e":{"f":5}}}), "c");
 },
 
+function mergeTest () {
+	var hash = Hash.new({"b":1, 1:"b", "c":{"d":{"e":{"f":5}}}});
+	assert.deepEqual(hash.merge({'b':5,'c':'foo'}), {"1":"b","b":5,"c":"foo"});
+	assert.deepEqual(hash, {"b":1, 1:"b", "c":{"d":{"e":{"f":5}}}});
+},
+
 ];
 
 // outside Rubylike test
@@ -146,7 +152,7 @@ Rubylike(function(r){
 });
 
 // outside Rubylike test
-for (var i = 0, len = testCase.length; i < len; i += 1) {
+for (i = 0, len = testCase.length; i < len; i += 1) {
 	assert.throws(function(){
 		testCase[i]();
 	});
