@@ -1,0 +1,104 @@
+<html>
+<head>
+<style type="text/css">
+</style>
+<script type="text/javascript" src="../lib/rubylike.js"></script>
+<script type="text/javascript" src="../test/test_array.js"></script>
+<script type="text/javascript">
+var eql = function (a, b) {
+	var ka, kb, key, keysa, keysb;
+	if (a === b) {
+		return true;
+	} else if (a.valueOf() === b.valueOf()) {
+		return true;
+	} else if (a instanceof Date && b instanceof Date) {
+		return a.getTime() === b.getTime();
+	} else if (typeof a != 'object' && typeof b != 'object') {
+		return a === b;
+	}
+
+	try {
+		keysa = Object.keys(a);
+		keysb = Object.keys(b);
+		if (keysa.length !== keysb.length) return false;
+		keysa.sort();
+		keysb.sort();
+		for (var i = 0, len = keysa.length; i < len; i += 1) {
+			if (keysa[i] !== keysb[i]) return false;
+		}
+		for (key in a) if (a.hasOwnProperty(key)) {
+			if (typeof a[key] === 'object') {
+				return eql(a[key], b[key]);
+			} else if (a[key] !== b[key]) {
+				return false;
+			}
+		}
+	} catch (ex) {
+		return false;
+	}
+	return true;
+};
+function assert () {
+}
+assert.ok = function (value, message) {
+	if (!value) throw new Error(message);
+};
+assert.strictEqual = function (actual, expected, message) {
+	assert.ok(actual === expected, message);
+};
+assert.deepEqual = function (actual, expected, message) {
+	if (!eql(actual, expected)) {
+		throw new Error (message);
+	}
+};
+assert.throws = function(block, message) {
+	var actual; 
+	try {
+		block();
+	} catch (ex) {
+		actual = ex;
+	}
+	assert.ok(actual !== undefined,message);
+};
+
+window.onload = function(){
+var i, len;
+console.time('test');
+
+var testCase = [].concat(
+	this.testCase.Array
+);
+Array.prototype.foo = function () {return [3,2,1]};
+Array.prototype._foo = function () {return [3,2,1]};
+
+assert.ok(typeof Rubylike === 'function');
+assert.throws(function(){ Rubylike() });
+assert.ok(1 < Rubylike.Array.new().methods().length);
+assert.ok(Rubylike.is_defined === false);
+for (i = 0, len = testCase.length; i < len; i += 1) {
+	testCase[i]();
+}
+Rubylike(function(R){
+	assert.ok(Rubylike === R);
+	assert.ok(Rubylike.is_defined === true);
+	for (i = 0, len = testCase.length; i < len; i += 1) {
+		testCase[i]();
+	}
+});
+assert.ok(Rubylike.is_defined === false);
+for (i = 0, len = testCase.length; i < len; i += 1) {
+	testCase[i]();
+}
+
+assert.deepEqual([].foo(), [3,2,1]);
+assert.deepEqual([]._foo(), [3,2,1]);
+console.timeEnd('test');
+document.getElementById('content').innerHTML = 'done';
+};
+</script>
+</head>
+<body>
+	<div id="content">
+	</div>
+</body>
+</html>

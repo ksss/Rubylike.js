@@ -1,7 +1,3 @@
-#! /usr/bin/env node
-var assert = require('assert');
-var Rubylike = require('../lib/rubylike.js').Rubylike;
-
 var testCase = [
 
 function classTest () {
@@ -16,7 +12,7 @@ function instanceTest () {
 	if (Rubylike.is_defined) {
 		assert.strictEqual(Array.new().class(), 'Array');
 	} else {
-		assert.strictEqual(Rubylike.Object.prototype.class.call([]), 'Array');
+		assert.strictEqual(Rubylike.Object.prototype.class.call(Rubylike.Array.new()), 'Array');
 	}
 },
 
@@ -43,6 +39,32 @@ function newTest () {
 		assert.throws(function(){Rubylike.Array.new({})});
 		assert.throws(function(){Rubylike.Array.new(null)});
 		assert.throws(function(){Rubylike.Array.new(function(){})});
+	}
+},
+
+function to_aTest () {
+	var fn = function(){};
+	var array = [1,Rubylike.Array.new(),[3],{4:5},"6",null,undefined,{},/\s/,fn];
+	if (Rubylike.is_defined) {
+		assert.deepEqual(array, [1,[],[3],{4:5},"6",null,undefined,{},/\s/,fn]);
+		assert.deepEqual(array.to_a(), [1,[],[3],{4:5},"6",null,undefined,{},/\s/,fn]);
+		assert.deepEqual(array, [1,[],[3],{4:5},"6",null,undefined,{},/\s/,fn]);
+	} else {
+		array = Rubylike.Array.new(array);
+		assert.deepEqual(array, {0:1,1:{length:0},2:[3],3:{4:5},4:"6",5:null,6:undefined,7:{},8:/\s/,9:fn,length:10});
+		assert.deepEqual(array.to_a(), [1,{length:0},[3],{4:5},"6",null,undefined,{},/\s/,fn]);
+		assert.deepEqual(array, {0:1,1:{length:0},2:[3],3:{4:5},4:"6",5:null,6:undefined,7:{},8:/\s/,9:fn,length:10});
+	}
+},
+
+function to_ary () {
+	var array = [1,2,3];
+	if (Rubylike.is_defined) {
+		assert.ok(array.to_ary() === array);
+	} else {
+		array = Rubylike.Array.new(array);
+		assert.ok(array.to_ary() === array);
+		assert.deepEqual(array.to_ary(), {0:1,1:2,2:3,length:3});
 	}
 },
 
@@ -596,23 +618,12 @@ function injectTest () {
 },
 
 ];
-Array.prototype.foo = function () {return [3,2,1]};
-Array.prototype._foo = function () {return [3,2,1]};
 
-assert.ok(typeof Rubylike === 'function');
-assert.throws(function(){ Rubylike() });
-assert.ok(1 < Rubylike.Array.new().methods().length);
-assert.ok(Rubylike.is_defined === false);
-Rubylike(function(r){
-	assert.ok(Rubylike.is_defined === true);
-	for (var i = 0, len = testCase.length; i < len; i += 1) {
-		testCase[i]();
-	}
-});
-assert.ok(Rubylike.is_defined === false);
-for (var i = 0, len = testCase.length; i < len; i += 1) {
-	testCase[i]();
+if (typeof exports === 'object') {
+	var assert = require('assert');
+	var Rubylike = require('../lib/rubylike.js').Rubylike;
+	exports.testCase = testCase;
+} else {
+	this.testCase = this.testCase || {};
+	this.testCase.Array = testCase;
 }
-
-assert.deepEqual([].foo(), [3,2,1]);
-assert.deepEqual([]._foo(), [3,2,1]);
