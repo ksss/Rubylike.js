@@ -14,6 +14,10 @@ function to_sTest () {
 	assert.strictEqual(3.141.to_s(), '3.141');
 },
 
+function to_intTest () {
+
+},
+
 function inspectTest () {
 	assert.strictEqual(5..inspect(), '5');
 	assert.strictEqual(3.141.inspect(), '3.141');

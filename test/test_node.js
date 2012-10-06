@@ -1,9 +1,7 @@
 #! /usr/bin/env node
 var assert = require('assert');
 var Rubylike = require('../lib/rubylike.js').Rubylike;
-
-var testCase = require('./test_array.js').testCase;
-
+var testCase = require('./test_array.js').testCase.Array;
 var i, len;
 
 Array.prototype.foo = function () {return [3,2,1]};
@@ -24,9 +22,25 @@ Rubylike(function(R){
 	}
 });
 assert.ok(Rubylike.is_defined === false);
+Rubylike(function(R){
+	assert.ok(Rubylike === R);
+	assert.ok(Rubylike.is_defined === true);
+	for (i = 0, len = testCase.length; i < len; i += 1) {
+		testCase[i]();
+	}
+});
+assert.ok(Rubylike.is_defined === false);
+Rubylike(function(R){
+	assert.ok(Rubylike === R);
+	assert.ok(Rubylike.is_defined === true);
+	for (i = 0, len = testCase.length; i < len; i += 1) {
+		testCase[i]();
+	}
+});
+assert.ok(Rubylike.is_defined === false);
 for (i = 0, len = testCase.length; i < len; i += 1) {
 	testCase[i]();
 }
-
+//console.log(process.memoryUsage()['heapUsed'] / 1024 + ' KB');
 assert.deepEqual([].foo(), [3,2,1]);
 assert.deepEqual([]._foo(), [3,2,1]);

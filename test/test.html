@@ -20,21 +20,21 @@ var eql = function (a, b) {
 	try {
 		keysa = Object.keys(a);
 		keysb = Object.keys(b);
-		if (keysa.length !== keysb.length) return false;
-		keysa.sort();
-		keysb.sort();
-		for (var i = 0, len = keysa.length; i < len; i += 1) {
-			if (keysa[i] !== keysb[i]) return false;
-		}
-		for (key in a) if (a.hasOwnProperty(key)) {
-			if (typeof a[key] === 'object') {
-				return eql(a[key], b[key]);
-			} else if (a[key] !== b[key]) {
-				return false;
-			}
-		}
 	} catch (ex) {
 		return false;
+	}
+	if (keysa.length !== keysb.length) return false;
+	keysa.sort();
+	keysb.sort();
+	for (var i = 0, len = keysa.length; i < len; i += 1) {
+		if (keysa[i] !== keysb[i]) return false;
+	}
+	for (key in a) if (a.hasOwnProperty(key)) {
+		if (typeof a[key] === 'object') {
+			return eql(a[key], b[key]);
+		} else if (a[key] !== b[key]) {
+			return false;
+		}
 	}
 	return true;
 };
@@ -58,42 +58,62 @@ assert.throws = function(block, message) {
 	} catch (ex) {
 		actual = ex;
 	}
-	assert.ok(actual !== undefined,message);
+	assert.ok(actual !== undefined, message);
 };
 
 window.onload = function(){
-var i, len;
-console.time('test');
+	var i, len;
+	console.time('test');
+	try {
+		var testCase = [].concat(
+			this.testCase.Array
+		);
+		Array.prototype.foo = function () {return [3,2,1]};
+		Array.prototype._foo = function () {return [3,2,1]};
 
-var testCase = [].concat(
-	this.testCase.Array
-);
-Array.prototype.foo = function () {return [3,2,1]};
-Array.prototype._foo = function () {return [3,2,1]};
+		assert.ok(typeof Rubylike === 'function');
+		assert.throws(function(){ Rubylike() });
+		assert.ok(1 < Rubylike.Array.new().methods().length);
+		assert.ok(Rubylike.is_defined === false);
+		for (i = 0, len = testCase.length; i < len; i += 1) {
+			testCase[i]();
+		}
+		Rubylike(function(R){
+			assert.ok(Rubylike === R);
+			assert.ok(Rubylike.is_defined === true);
+			for (i = 0, len = testCase.length; i < len; i += 1) {
+				testCase[i]();
+			}
+		});
+		assert.ok(Rubylike.is_defined === false);
+		Rubylike(function(R){
+			assert.ok(Rubylike === R);
+			assert.ok(Rubylike.is_defined === true);
+			for (i = 0, len = testCase.length; i < len; i += 1) {
+				testCase[i]();
+			}
+		});
+		assert.ok(Rubylike.is_defined === false);
+		Rubylike(function(R){
+			assert.ok(Rubylike === R);
+			assert.ok(Rubylike.is_defined === true);
+			for (i = 0, len = testCase.length; i < len; i += 1) {
+				testCase[i]();
+			}
+		});
+		assert.ok(Rubylike.is_defined === false);
+		for (i = 0, len = testCase.length; i < len; i += 1) {
+			testCase[i]();
+		}
 
-assert.ok(typeof Rubylike === 'function');
-assert.throws(function(){ Rubylike() });
-assert.ok(1 < Rubylike.Array.new().methods().length);
-assert.ok(Rubylike.is_defined === false);
-for (i = 0, len = testCase.length; i < len; i += 1) {
-	testCase[i]();
-}
-Rubylike(function(R){
-	assert.ok(Rubylike === R);
-	assert.ok(Rubylike.is_defined === true);
-	for (i = 0, len = testCase.length; i < len; i += 1) {
-		testCase[i]();
+		assert.deepEqual([].foo(), [3,2,1]);
+		assert.deepEqual([]._foo(), [3,2,1]);
+		console.timeEnd('test');
+		document.getElementById('content').innerHTML = '<span style="color:green;">OK</span>';
+	} catch (ex) {
+		document.getElementById('content').innerHTML = '<span style="color:red;">NG</span>';
+		throw ex;
 	}
-});
-assert.ok(Rubylike.is_defined === false);
-for (i = 0, len = testCase.length; i < len; i += 1) {
-	testCase[i]();
-}
-
-assert.deepEqual([].foo(), [3,2,1]);
-assert.deepEqual([]._foo(), [3,2,1]);
-console.timeEnd('test');
-document.getElementById('content').innerHTML = 'done';
 };
 </script>
 </head>
