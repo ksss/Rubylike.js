@@ -108,6 +108,7 @@ window.onload = function(){
 
 		assert.deepEqual([].foo(), [3,2,1]);
 		assert.deepEqual([]._foo(), [3,2,1]);
+
 		console.timeEnd('test');
 		document.getElementById('content').innerHTML = '<span style="color:green;">OK</span>';
 	} catch (ex) {
