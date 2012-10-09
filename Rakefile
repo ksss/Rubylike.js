@@ -9,7 +9,7 @@ COPYRIGHT = <<EOS
 // Copyright (c) 2012 ksss <co000ri@gmail.com>
 EOS
 
-CLEAN.include ["rubylike.nodoc.js"]
+CLEAN.include ["rubylike.mini.js"]
 
 def mini(source)
   uri = URI.parse('http://closure-compiler.appspot.com/compile')
@@ -26,9 +26,9 @@ def mini(source)
   COPYRIGHT + source
 end
 
-task :default => "rubylike.nodoc.js"
+task :default => "rubylike.mini.js"
 
-file "rubylike.nodoc.js" => ["rubylike.js"] do |t|
+file "rubylike.mini.js" => ["rubylike.js"] do |t|
   File.open(t.name, "w") { |f|
     f << mini(File.read("rubylike.js"))
   }
