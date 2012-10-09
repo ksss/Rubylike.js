@@ -44,3 +44,4 @@ for (i = 0, len = testCase.length; i < len; i += 1) {
 //console.log(process.memoryUsage()['heapUsed'] / 1024 + ' KB');
 assert.deepEqual([].foo(), [3,2,1]);
 assert.deepEqual([]._foo(), [3,2,1]);
+
