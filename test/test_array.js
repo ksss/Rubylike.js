@@ -1154,7 +1154,7 @@ function zipTest () {
 
 if (typeof require === 'function') {
 	var assert = require('assert');
-	var Rubylike = require('../lib/rubylike.js').Rubylike;
+	var Rubylike = require('../rubylike.js').Rubylike;
 }
 this.testCase = this.testCase || {};
 this.testCase.Array = testCase;

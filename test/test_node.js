@@ -1,6 +1,7 @@
 #! /usr/bin/env node
+
 var assert = require('assert');
-var Rubylike = require('../lib/rubylike.js').Rubylike;
+var Rubylike = require('../rubylike.js').Rubylike;
 var testCase = require('./test_array.js').testCase.Array;
 var i, len;
 
