@@ -1,5 +1,19 @@
 var to_a = function (i) { return i.to_a() };
 var testCase = [
+function originalTest () {
+	[].pop();
+	[].push();
+	[].reverse();
+	[].shift();
+	[].sort();
+	[].splice();
+	[].unshift();
+	[].concat([]);
+	[].join();
+	[].slice(0);
+	[].map(function(){});
+	[].every(function(){});
+},
 
 function classTest () {
 	if (Rubylike.is_defined) {
@@ -69,6 +83,46 @@ function to_ary () {
 	}
 },
 
+function allTest () {
+	if (Rubylike.is_defined) {
+		assert.ok([5,6,7].all() === true);
+		assert.ok([0,6,7].all() === false);
+		assert.ok([5,6,7].all(function(v){ return v > 0 } === true));
+		assert.ok([5,-1,7].all(function(v){ return v > 0 }) === false);
+	} else {
+		assert.ok(Rubylike.Array.new([5,6,7]).all() === true);
+		assert.ok(Rubylike.Array.new([0,6,7]).all() === false);
+		assert.ok(Rubylike.Array.new([5,6,7]).all(function(v){ return v > 0 }));
+		assert.ok(Rubylike.Array.new([5,-1,7]).all(function(v){ return v > 0 }) === false);
+	}
+},
+
+function anyTest () {
+	if (Rubylike.is_defined) {
+		assert.ok([5,6,7].any() === true);
+		assert.ok([0,null,false].any() === false);
+		assert.ok([1,2,3].any(function(v){ return v > 3 } === false));
+		assert.ok([1,2,3].any(function(v){ return v > 1 }) === true);
+	} else {
+		assert.ok(Rubylike.Array.new([5,6,7]).any() === true);
+		assert.ok(Rubylike.Array.new([0,null,false]).any() === false);
+		assert.ok(Rubylike.Array.new([1,2,3]).any(function(v){ return v > 3 }) === false);
+		assert.ok(Rubylike.Array.new([1,2,3]).any(function(v){ return v > 1 }) === true);
+	}
+},
+
+function flat_mapTest () {
+	if (Rubylike.is_defined) {
+		assert.deepEqual([[1,2],[3,4]].flat_map(function(i){ return i.map(function(j){ return j * 2 }) }), [2,4,6,8]);
+		assert.deepEqual([[[1,2]],[[3,4]]].flat_map(function(i){ return i }), [[1,2],[3,4]]);
+		assert.deepEqual([1,2,[[3,4]]].flat_map(function(i){ return i }), [1,2,[3,4]]);
+	} else {
+		assert.deepEqual(Rubylike.Array.new([[1,2],[3,4]]).flat_map(function(i){ return i.map(function(j){ return j * 2 }) }).to_a(), [2,4,6,8]);
+		assert.deepEqual(Rubylike.Array.new([[[1,2]],[[3,4]]]).flat_map(function(i){ return i }).to_a(), [[1,2],[3,4]]);
+		assert.deepEqual(Rubylike.Array.new([1,2,[[3,4]]]).flat_map(function(i){ return i }).to_a(), [1,2,[3,4]]);
+	}
+},
+
 function assocTest () {
 	var array = [[1,15], Rubylike.Array.new([2,25]), ["foo",35], [{"a":3},3]];
 	if (Rubylike.is_defined) {
@@ -129,17 +183,19 @@ function clearTest () {
 },
 
 function cloneTest () {
-	var array = [{"foo":1}];
+	var array = [{"foo":1},2];
 	var copy;
 	if (Rubylike.is_defined) {
 		copy = array.clone();
 		assert.ok(array !== copy);
 		assert.ok(array[0] === copy[0]);
+		assert.deepEqual(copy, [{"foo":1},2])
 	} else {
-		array = Rubylike.Array.new();
+		array = Rubylike.Array.new(array);
 		copy = array.clone();
 		assert.ok(array !== copy);
 		assert.ok(array[0] === copy[0]);
+		assert.deepEqual(copy.to_a(), [{"foo":1},2])
 	}
 },
 
@@ -191,14 +247,14 @@ function combinationTest () {
 			tmp.push(i[0] + 3);
 			return tmp;
 		});
-		assert.deepEqual(array.combination(1).to_a(), [[1],[2],[3],[4]]);
-		assert.deepEqual(array.combination(2).to_a(), [[1,2],[1,3],[1,4],[2,3],[2,4],[3,4]]);
-		assert.deepEqual(array.combination(3).to_a(), [[1,2,3],[1,2,4],[1,3,4],[2,3,4]]);
-		assert.deepEqual(array.combination(4).to_a(), [[1,2,3,4]]);
-		assert.deepEqual(array.combination(0).to_a(), [[]]);
-		assert.deepEqual(array.combination(5).to_a(), []);
-		assert.deepEqual(array.combination(6).to_a(), []);
-		assert.deepEqual(array.combination(-1).to_a(), []);
+		assert.deepEqual(array.combination(1).map(to_a).to_a(), [[1],[2],[3],[4]]);
+		assert.deepEqual(array.combination(2).map(to_a).to_a(), [[1,2],[1,3],[1,4],[2,3],[2,4],[3,4]]);
+		assert.deepEqual(array.combination(3).map(to_a).to_a(), [[1,2,3],[1,2,4],[1,3,4],[2,3,4]]);
+		assert.deepEqual(array.combination(4).map(to_a).to_a(), [[1,2,3,4]]);
+		assert.deepEqual(array.combination(0).map(to_a).to_a(), [[]]);
+		assert.deepEqual(array.combination(5).map(to_a).to_a(), []);
+		assert.deepEqual(array.combination(6).map(to_a).to_a(), []);
+		assert.deepEqual(array.combination(-1).map(to_a).to_a(), []);
 		assert.ok(array === ret);
 		assert.ok(array === copy);
 		assert.deepEqual(tmp, [4,5,6,7]);
@@ -236,6 +292,20 @@ function concatTest () {
 		assert.ok(array.concat(a) === array);
 		assert.deepEqual(array.to_a(), [1,2,3,4]);
 		assert.deepEqual(a.to_a(), [3,4]);
+	}
+},
+
+function countTest () {
+	var array = [1,2,4,2];
+	if (Rubylike.is_defined) {
+		assert.ok(array.count() === 4);
+		assert.strictEqual(array.count(2),2);
+		assert.ok(array.count(function(x){ return x % 2 === 0 }) === 3);
+	} else {
+		array = Rubylike.Array.new(array);
+		assert.ok(array.count() === 4);
+		assert.strictEqual(array.count(2),2);
+		assert.ok(array.count(function(x){ return x % 2 === 0 }) === 3);
 	}
 },
 
@@ -359,6 +429,31 @@ function delete_atTest () {
 	}
 },
 
+function dropTest () {
+	var array = [1,2,3,4,5,0]
+	if (Rubylike.is_defined) {
+		assert.deepEqual(array.drop(3), [4,5,0]);
+		assert.deepEqual(array.drop(10), []);
+		assert.deepEqual(array, [1,2,3,4,5,0]);
+	} else {
+		array = Rubylike.Array.new(array);
+		assert.deepEqual(array.drop(10).to_a(), []);
+		assert.deepEqual(array.to_a(), [1,2,3,4,5,0]);
+	}
+},
+
+function drop_whileTest () {
+	var array = [1,2,3,4,5,0];
+	if (Rubylike.is_defined) {
+		assert.deepEqual(array.drop_while(function(i){ return i < 3 }), [3,4,5,0]);
+		assert.deepEqual(array, [1,2,3,4,5,0]);
+	} else {
+		array = Rubylike.Array.new(array);
+		assert.deepEqual(array.drop_while(function(i){ return i < 3 }).to_a(), [3,4,5,0]);
+		assert.deepEqual(array.to_a(), [1,2,3,4,5,0]);
+	}
+},
+
 function eachTest () {
 	var array = [1,3,5];
 	var i = 0;
@@ -383,6 +478,32 @@ function eachTest () {
 		assert.deepEqual(tmp, [1,3,5]);
 		assert.ok(array === ret);
 		assert.ok(array !== tmp);
+	}
+},
+
+function each_consTest () {
+	var array = [1,2,3,4,5,6,7,8,9,10];
+	var tmp = [];
+	if (Rubylike.is_defined) {
+		assert.ok(array.each_cons(3, function(v){ tmp.push(v) }) === null);
+		assert.deepEqual(tmp, [[1,2,3],[2,3,4],[3,4,5],[4,5,6],[5,6,7],[6,7,8],[7,8,9],[8,9,10]]);
+	} else {
+		array = Rubylike.Array.new(array);
+		assert.ok(array.each_cons(3, function(v){ tmp.push(v) }) === null);
+		assert.deepEqual(tmp.map(to_a), [[1,2,3],[2,3,4],[3,4,5],[4,5,6],[5,6,7],[6,7,8],[7,8,9],[8,9,10]]);
+	}
+},
+
+function each_sliceTest () {
+	var array = [1,2,3,4,5,6,7,8,9,10];
+	var tmp = []
+	if (Rubylike.is_defined) {
+		assert.ok(array.each_slice(3, function(a){ tmp.push(a) }) === null);
+		assert.deepEqual(tmp, [[1,2,3],[4,5,6],[7,8,9],[10]]);
+	} else {
+		array = Rubylike.Array.new(array);
+		assert.ok(array.each_slice(3, function(a){ tmp.push(a) }) === null);
+		assert.deepEqual(tmp.map(to_a), [[1,2,3],[4,5,6],[7,8,9],[10]]);
 	}
 },
 
@@ -413,6 +534,16 @@ function each_with_indexTest () {
 		assert.deepEqual(array.to_a(), [1,3,5]);
 		assert.ok(array === array.each_with_index(function (item, index) {tmp.push([item, index])}));
 		assert.deepEqual(tmp, [[1,0],[3,1],[5,2]]);
+	}
+},
+
+function each_with_objectTest () {
+	var array = [1,2,3,4,5,6,7,8,9,10];
+	if (Rubylike.is_defined) {
+		assert.deepEqual(array.each_with_object([], function(i,a){ a.push(i*2) }), [2,4,6,8,10,12,14,16,18,20]);
+	} else {
+		array = Rubylike.Array.new(array);
+		assert.deepEqual(array.each_with_object([], function(i,a){ a.push(i*2) }), [2,4,6,8,10,12,14,16,18,20]);
 	}
 },
 
@@ -477,6 +608,28 @@ function fillTest () {
 		assert.deepEqual(a.fill(4, 5, function(i){return i}).to_a(), [0,1,2,0,4,5,6,7,8]);
 		assert.throws(function(){a.fill()});
 		assert.throws(function(){a.fill(0,0,0,0)});
+	}
+},
+
+function findTest () {
+	if (Rubylike.is_defined) {
+		assert.ok([1,2,3,4,5].find(function(i){ return i % 3 === 0 }) === 3);
+		assert.ok([2,2,2,2,2].find(function(i){ return i % 3 === 0 }) === null);
+		assert.ok([1,2,3,4,5].find('not found', function(i){ return i % 7 === 0 }) === 'not found');
+	} else {
+		assert.ok(Rubylike.Array.new([1,2,3,4,5]).find(function(i){ return i % 3 === 0 }) === 3);
+		assert.ok(Rubylike.Array.new([2,2,2,2,2]).find(function(i){ return i % 3 === 0 }) === null);
+		assert.ok(Rubylike.Array.new([1,2,3,4,5]).find('not found', function(i){ return i % 7 === 0 }) === 'not found');
+	}
+},
+
+function find_indexTest () {
+	if (Rubylike.is_defined) {
+		assert.ok([1,2,3,4,5].find_index(function(i){ return i % 3 === 0 }) === 2);
+		assert.ok([2,2,2,2,2].find_index(function(i){ return i % 3 === 0 }) === null);
+	} else {
+		assert.ok(Rubylike.Array.new([1,2,3,4,5]).find_index(function(i){ return i % 3 === 0 }) === 2);
+		assert.ok(Rubylike.Array.new([2,2,2,2,2]).find_index(function(i){ return i % 3 === 0 }) === null);
 	}
 },
 
@@ -990,13 +1143,14 @@ function shuffleTest () {
 },
 
 function sliceTest () {
-	var array = [0,1,2];
+	var array = [0,1,2,3,4];
 	if (Rubylike.is_defined) {
 		assert.ok(array.slice(1) === 1);
 		assert.ok(array.slice(2) === 2);
 		assert.ok(array.slice(10) === null);
 		assert.deepEqual(array.slice(0, 2), [0, 1]);
-		assert.deepEqual(array.slice(2, 3), [2]);
+		assert.deepEqual(array.slice(2, 3), [2,3,4]);
+		assert.deepEqual(array.slice(3, 9), [3,4]);
 		assert.deepEqual(array.slice(10, 1), null);
 		assert.deepEqual(array.slice(0, -1), null);
 		assert.throws(function(){array.slice(0,"1")});
@@ -1006,7 +1160,8 @@ function sliceTest () {
 		assert.ok(array.slice(2) === 2);
 		assert.ok(array.slice(10) === null);
 		assert.deepEqual(array.slice(0, 2).to_a(), [0, 1]);
-		assert.deepEqual(array.slice(2, 3).to_a(), [2]);
+		assert.deepEqual(array.slice(2, 3).to_a(), [2,3,4]);
+		assert.deepEqual(array.slice(3, 9).to_a(), [3,4]);
 		assert.deepEqual(array.slice(10, 1), null);
 		assert.deepEqual(array.slice(0, -1), null);
 		assert.throws(function(){array.slice(0,"1")});
