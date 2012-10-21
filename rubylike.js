@@ -104,6 +104,12 @@ Rubylike.remove = function () {
 	Rubylike.is_defined = false;
 };
 
+Rubylike.ship = function (a, b) {
+	if (a < b) return -1;
+	else if (a > b) return 1;
+	return 0;
+};
+
 Rubylike.raise = function (name, message) {
 	var error = new Error();
 	error.name = name;
@@ -175,6 +181,9 @@ Rubylike.Object.prototype = {
 			if (!arguments.callee.call(this[key], obj[key])) return false;
 		}
 		return true;
+	},
+	equal: function (other) {
+		return this.valueOf() === other;
 	},
 	methods: function () {
 		return Rubylike[this['class']()]._methods;
@@ -436,17 +445,13 @@ Rubylike.Array.def({
 		return at;
 	},
 	drop: function (n) {
-		var clone = this.clone();
-		JS.Array.splice.call(clone, 0, n);
-		return clone;
+		return Rubylike.Array['new']().concat(JS.Array.slice.call(this, n, this.length));
 	},
 	drop_while: function (yield) {
-		var clone = this.clone();
-		for (var i = 0, len = clone.length; i < len; i += 1) {
-			if (!yield(clone[i])) break;
+		for (var i = 0, len = this.length; i < len; i += 1) {
+			if (!yield(this[i])) break;
 		}
-		JS.Array.splice.call(clone, 0, i);
-		return clone;
+		return this.drop(i);
 	},
 	each: function (yield) {
 		for (var i = 0, len = this.length; i < len; i += 1) {
@@ -613,6 +618,38 @@ Rubylike.Array.def({
 		}
 		return flat_map;
 	},
+	grep: function (pattern, yield) {
+		var grep = Rubylike.Array['new'](), i, len;
+		if (typeof pattern.test === 'function') {
+			for (i = 0, len = this.length; i < len; i += 1) {
+				if (pattern.test(this[i])) JS.Array.push.call(grep, this[i]);
+			}
+		} else {
+			for (i = 0, len = this.length; i < len; i += 1) {
+				if (this[i] === pattern) JS.Array.push.call(grep, this[i]);
+			}
+		}
+
+		if (typeof yield === 'function') {
+			for (i = 0, len = grep.length; i < len; i += 1) {
+				grep[i] = yield(grep[i]);
+			}
+		}
+		return grep;
+	},
+	group_by: function (yield) {
+		var hash = Rubylike.Hash['new']();
+		for (var i = 0, len = this.length; i < len; i += 1) {
+			var key = yield(this[i]);
+			var array = Rubylike.Array['new']();
+			if (hash[key] === undefined) {
+				hash[key] = array.push(this[i]);
+			} else {
+				hash[key] = hash[key].push(this[i]);
+			}
+		}
+		return hash;
+	},
 	include: function (val) {
 		for (var i = 0, len = this.length; i < len; i += 1) {
 			if (Rubylike.Object.prototype.eql.call(this[i], val)) return true;
@@ -709,6 +746,115 @@ Rubylike.Array.def({
 			Rubylike.raise('ArgumentError', 'negative array size');
 		}
 		return Rubylike.Array['new'](JS.Array.slice.call(this, this.length - n));
+	},
+	max: function (yield) {
+		var max = this[0];
+		var first_class = className(this[0]);
+		var ship = Rubylike.ship;
+		var result;
+
+		if (this.length === 0) return null;
+		else if (this.length === 1) return this[0];
+
+		if (typeof yield === 'function') ship = yield;
+
+		for (var i = 1, len = this.length; i < len; i += 1) {
+			result = ship(this[i], max);
+			if (className(this[i]) !== first_class || className(result) !== 'Number') {
+				Rubylike.raise('ArgumentError', "`max': comparison of "+className(this[i])+" with "+max+" failed");
+			}
+			if (0 < result) max = this[i];
+		}
+		return max;
+	},
+	max_by: function (yield) {
+		if (this.length === 0) return null;
+		else if (this.length === 1) return this[0];
+
+		return this.map(function(i){ return [yield(i), i] }).max(function(a, b){
+			return Rubylike.ship(a[0], b[0]);
+		}).map(function(i){ return i[1] });
+	},
+	min: function (yield) {
+		var min = this[0];
+		var first_class = className(this[0]);
+		var ship = Rubylike.ship;
+		var result;
+
+		if (this.length === 0) return null;
+		else if (this.length === 1) return this[0];
+
+		if (typeof yield === 'function') ship = yield;
+
+		for (var i = 1, len = this.length; i < len; i += 1) {
+			result = ship(this[i], min);
+			if (className(this[i]) !== first_class || className(result) !== 'Number') {
+				Rubylike.raise('ArgumentError', "`min': comparison of "+className(this[i])+" with "+min+" failed");
+			}
+			if (result < 0) min = this[i];
+		}
+		return min;
+	},
+	min_by: function (yield) {
+		if (this.length === 0) return null;
+		else if (this.length === 1) return this[0];
+
+		return this.map(function(i){ return [yield(i), i] }).min(function(a, b){
+			return Rubylike.ship(a[0], b[0]);
+		}).map(function(i){ return i[1] });
+	},
+	minmax: function (yield) {
+		return Rubylike.Array['new']([this.min(yield), this.max(yield)]);
+	},
+	minmax_by: function (yield) {
+		if (this.length === 0) return Rubylike.Array['new']([null, null])
+		else if (this.length === 1) return Rubylike.Array['new']([this[0], this[0]])
+
+		return this.map(function(i){ return [yield(i), i] }).minmax(function(a, b){
+			return Rubylike.ship(a[0], b[0]);
+		}).map(function(i){ return i[1] });
+	},
+	none: function (yield) {
+		if (typeof yield === 'function') {
+			for (var i = 0, len = this.length; i < len; i += 1) {
+				if (yield(this[i])) return false;
+			}
+		} else {
+			for (var i = 0, len = this.length; i < len; i += 1) {
+				if (this[i]) return false;
+			}
+		}
+		return true;
+	},
+	one: function (yield) {
+		var count = 0, i, len;
+		if (typeof yield === 'function') {
+			for (i = 0, len = this.length; i < len; i += 1) {
+				if (yield(this[i])) {
+					count += 1;
+					if (1 < count) return false;
+				}
+			}
+		} else {
+			for (i = 0, len = this.length; i < len; i += 1) {
+				if (this[i]) {
+					count += 1;
+					if (1 < count) return false;
+				}
+			}
+		}
+		return (count === 1);
+	},
+	partition: function (yield) {
+		var partition = Rubylike.Array['new']([Rubylike.Array['new'](), Rubylike.Array['new']()]);
+		for (var i = 0, len = this.length; i < len; i += 1) {
+			if (yield(this[i])) {
+				partition[0].push(this[i]);
+			} else {
+				partition[1].push(this[i]);
+			}
+		}
+		return partition;
 	},
 	pop: function (n) {
 		var ret = Rubylike.Array['new']();
@@ -983,15 +1129,23 @@ Rubylike.Array.def({
 		}
 		Rubylike.raise('ArgumentError', "`slice': wrong number of arguments ("+arguments.legnth+" for 1..2)");
 	},
+	sort: function (yield) {
+		if (yield === undefined) yield = Rubylike.ship;
+		return JS.Array.sort.call(this.clone(), yield);
+	},
 	sort_by: function (yield) {
-		return this.map(function(i){return [yield(i), i]}).sort(function(a, b){
-			if (a[0] < b[0]) {
-				return -1;
-			} else if (a[0] > b[0]) {
-				return 1;
-			}
-			return 0;
+		return this.map(function(i){ return [yield(i), i] }).sort(function(a, b){
+			return Rubylike.ship(a[0], b[0]);
 		}).map(function(i){ return i[1] });
+	},
+	take: function (n) {
+		return Rubylike.Array['new']().concat(JS.Array.slice.call(this, 0, n));
+	},
+	take_while: function (yield) {
+		for (var i = 0, len = this.length; i < len; i += 1) {
+			if (!yield(this[i])) break;
+		}
+		return this.take(i);
 	},
 	to_a: function () {
 		if (Rubylike.is_defined) {
@@ -1053,7 +1207,7 @@ Rubylike.Array.def({
 		return uniq;
 	},
 	unshift: function () {
-		JS.Array.unshift.apply(this, arguments); // javascript unshift return this.length
+		JS.Array.unshift.apply(this, arguments);
 		return this;
 	},
 	values_at: function () {
@@ -1095,14 +1249,17 @@ Rubylike.Array.def({
 		return zip;
 	}
 });
+Rubylike.Array.prototype.collect_concat = Rubylike.Array.prototype.flat_map;
+Rubylike.Array.prototype.detect = Rubylike.Array.prototype.find;
+Rubylike.Array.prototype.dup = Rubylike.Array.prototype.clone;
 Rubylike.Array.prototype.entries = Rubylike.Array.prototype.to_a;
 Rubylike.Array.prototype.find_all = Rubylike.Array.prototype.select;
-Rubylike.Array.prototype.dup = Rubylike.Array.prototype.clone;
-Rubylike.Array.prototype.map = Rubylike.Array.prototype.collect;
-Rubylike.Array.prototype.detect = Rubylike.Array.prototype.find;
-Rubylike.Array.prototype.collect_concat = Rubylike.Array.prototype.flat_map;
 Rubylike.Array.prototype.inspect = Rubylike.Array.prototype.to_s;
+Rubylike.Array.prototype.map = Rubylike.Array.prototype.collect;
+Rubylike.Array.prototype.member = Rubylike.Array.prototype.include;
 Rubylike.Array.prototype.permutation = Rubylike.Array.prototype.combination;
+Rubylike.Array.prototype.reduce = Rubylike.Array.prototype.inject;
+
 // }}}
 
 // {{{ Hash
@@ -1133,6 +1290,13 @@ Rubylike.Hash.prototype.to_hash = function () {
 };
 Rubylike.Hash.prototype.first = function () {
 	return this.to_a()[0];
+};
+Rubylike.Hash.prototype.map = function (yield) {
+	var clone = Rubylike.Hash['new']();
+	for (var key in this) if (this.hasOwnProperty(key)) {
+		clone[key] = yield(this[key]);
+	}
+	return clone;
 };
 Rubylike.Hash.prototype.shift = function () {
 	var first = this.first();

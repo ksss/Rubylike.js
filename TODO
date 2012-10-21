@@ -1,3 +1,3 @@
 Array => 終了
 Enumerator => 利点はnextとwith_index => 今のところなしで
-Enumerable => Arrayとしてできるだけ実装
+Enumerable => Arrayとしてできるだけ実装 => chunk意外終了
