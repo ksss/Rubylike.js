@@ -1,4 +1,5 @@
 var to_a = function (i) { return i.to_a() };
+var nil = null;
 var testCase = [
 
 function originalTest () {
@@ -16,19 +17,11 @@ function originalTest () {
 	[].every(function(){});
 },
 
-function classTest () {
-	if (Rubylike.is_defined) {
-		assert.strictEqual(Array.class(), 'Function');
-	} else {
-		assert.strictEqual(Rubylike.Object.prototype.class.call(Array), 'Function');
-	}
-},
-
 function instanceTest () {
 	if (Rubylike.is_defined) {
 		assert.strictEqual(Array.new().class(), 'Array');
 	} else {
-		assert.strictEqual(Rubylike.Object.prototype.class.call(Rubylike.Array.new()), 'Array');
+		assert.strictEqual(Rubylike.Object.class(Rubylike.Array.new()), 'Array');
 	}
 },
 
@@ -1164,14 +1157,12 @@ function rejectTest () {
 	if (Rubylike.is_defined) {
 		copy = array;
 		assert.deepEqual(array.reject(function(i){return i === 2}), [1,3,1]);
-		assert.deepEqual(array.reject(function(i){return i === 5}), nil);
 		assert.ok(array === copy);
 		assert.deepEqual(array,[1,2,3,2,1]);
 	} else {
 		array = Rubylike.Array.new(array);
 		copy = array;
 		assert.deepEqual(array.reject(function(i){return i === 2}).to_a(), [1,3,1]);
-		assert.deepEqual(array.reject(function(i){return i === 5}), null);
 		assert.ok(array === copy);
 		assert.deepEqual(array.to_a(),[1,2,3,2,1]);
 	}
@@ -1399,7 +1390,7 @@ function sort_byTest () {
 		strings = Rubylike.Array.new(strings);
 		assert.deepEqual(array.sort_by(function(i){ return i }).to_a(), ["10","11","7","8","9"]);
 		assert.deepEqual(array.sort_by(function(i){ return +i }).to_a(), ["7","8","9","10","11"]);
-		assert.deepEqual(rands.sort(function(a,b){ return a - b }), rands.sort_by(function(v){ return v }));
+		assert.deepEqual(rands.sort(), rands.sort_by(function(v){ return v }));
 		assert.deepEqual(strings.sort_by(function(i){ return i }).to_a(), [".","@","A","[","a"]);
 		assert.deepEqual(array.to_a(), ["9","7","10","11","8"]);
 	}

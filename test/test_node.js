@@ -2,7 +2,8 @@
 
 var assert = require('assert');
 var Rubylike = require('../rubylike.js').Rubylike;
-var testCase = require('./test_array.js').testCase.Array;
+var testCase = require('./test_array.js').testCase.Array
+	.concat(require('./test_hash.js').testCase.Hash);
 var i, len;
 
 Array.prototype.foo = function () {return [3,2,1]};

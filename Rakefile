@@ -24,7 +24,7 @@ def mini(source)
   COPYRIGHT + source
 end
 
-task :default => "rubylike.mini.js"
+task :default => ["rubylike.mini.js"]
 
 file "rubylike.mini.js" => ["rubylike.js"] do |t|
   File.open(t.name, "w") { |f|
