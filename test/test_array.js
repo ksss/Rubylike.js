@@ -1,5 +1,4 @@
 var to_a = function (i) { return i.to_a() };
-var nil = null;
 var testCase = [
 
 function originalTest () {
@@ -28,7 +27,7 @@ function instanceTest () {
 function newTest () {
 	if (Rubylike.is_defined) {
 		assert.deepEqual(Array.new(), []);
-		assert.deepEqual(Array.new(3), [nil,nil,nil]);
+		assert.deepEqual(Array.new(3), [null,null,null]);
 		assert.deepEqual(Array.new(3, 0), [0,0,0]);
 		assert.deepEqual(Array.new([1,2,3]), [1,2,3]);
 		assert.deepEqual(Array.new(3, {"foo":5}).to_a(), [{"foo":5},{"foo":5},{"foo":5}]);
@@ -121,8 +120,8 @@ function assocTest () {
 	var array = [[1,15], Rubylike.Array.new([2,25]), ["foo",35], [{"a":3},3]];
 	if (Rubylike.is_defined) {
 		assert.deepEqual(array.assoc(2), [2,25]);
-		assert.strictEqual(array.assoc(100), nil);
-		assert.strictEqual(array.assoc(15), nil);
+		assert.strictEqual(array.assoc(100), null);
+		assert.strictEqual(array.assoc(15), null);
 		assert.deepEqual(array.assoc("foo"), ["foo",35]);
 		assert.deepEqual(array.assoc({"a":3}), [{"a":3},3]);
 	} else {
@@ -142,8 +141,8 @@ function atTest () {
 		assert.strictEqual(array.at(3), "foo");
 		assert.strictEqual(array.at(-1), "foo");
 		assert.strictEqual(array.at(-2), 2);
-		assert.strictEqual(array.at(10), nil);
-		assert.strictEqual(array.at(-10), nil);
+		assert.strictEqual(array.at(10), null);
+		assert.strictEqual(array.at(-10), null);
 		assert.throws(function(){array.at("at")});
 		assert.throws(function(){array.at(function(){})});
 	} else {
@@ -265,7 +264,7 @@ function compactTest () {
 	var array = [1,null,2,null,3,null];
 	if (Rubylike.is_defined) {
 		assert.deepEqual(array.compact(), [1,2,3]);
-		assert.deepEqual(array, [1,nil,2,nil,3,nil]);
+		assert.deepEqual(array, [1,null,2,null,3,null]);
 	} else {
 		array = Rubylike.Array.new(array);
 		assert.deepEqual(array.compact().to_a(), [1,2,3]);
@@ -327,9 +326,9 @@ function cycleTest () {
 	var n = 0;
 	if (Rubylike.is_defined) {
 		copy = array;
-		assert.deepEqual(array.cycle(1,function(i){return tmp.push(i)}), nil);
-		assert.deepEqual(array.cycle(3,function(i){return tmp.push(i)}), nil);
-		assert.deepEqual(array.cycle(7,function(i){return tmp.push(i)}), nil);
+		assert.deepEqual(array.cycle(1,function(i){return tmp.push(i)}), null);
+		assert.deepEqual(array.cycle(3,function(i){return tmp.push(i)}), null);
+		assert.deepEqual(array.cycle(7,function(i){return tmp.push(i)}), null);
 		assert.throws(function(){ array.cycle() });
 		assert.throws(function(){ array.cycle(function(i){return;}) });
 		assert.deepEqual(tmp, [1,1,2,3,1,2,3,1,2,3,1]);
@@ -351,7 +350,7 @@ function deleteTest () {
 	var copy;
 	if (Rubylike.is_defined) {
 		copy = array;
-		assert.deepEqual(array.delete(10), nil);
+		assert.deepEqual(array.delete(10), null);
 		assert.deepEqual(array.delete(2), 2);
 		assert.deepEqual(array, [1,3,1]);
 		assert.deepEqual(array.delete(1,function(i){tmp.push(i)}), 1);
@@ -1062,8 +1061,8 @@ function rassocTest () {
 	var array = [[15,1],[25,2],[35,3],[45,"foo"],[55,{"a":5}]];
 	if (Rubylike.is_defined) {
 		assert.deepEqual(array.rassoc(2), [25,2]);
-		assert.strictEqual(array.rassoc(100), nil);
-		assert.strictEqual(array.rassoc(15), nil);
+		assert.strictEqual(array.rassoc(100), null);
+		assert.strictEqual(array.rassoc(15), null);
 		assert.deepEqual(array.rassoc("foo"), [45,"foo"]);
 		assert.deepEqual(array.rassoc({"a":5}), [55,{"a":5}]);
 	} else {

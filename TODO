@@ -11,3 +11,5 @@ HashオブシェクトはHash.new()で作成する
 Rubyにfooメソッドとfoo!メソッドがある場合fooのみとする。引数次第で変化させてもいいかもしれない。
 fooメソッドとfoo?メソッドがあった場合fooのみとする
 foo?のみの場合fooとして扱う
+
+repeated_combination,repeated_permutation n === 0 の時バグってる？

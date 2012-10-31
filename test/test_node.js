@@ -22,6 +22,13 @@ Rubylike(function(R){
 	for (i = 0, len = testCase.length; i < len; i += 1) {
 		testCase[i]();
 	}
+//	var hash = [];
+//	for (var i = 0; i < 1000000; i++) {
+//		hash.push(i);
+//	}
+//	console.time('flatten');
+//	hash.clone();
+//	console.timeEnd('flatten');
 });
 assert.ok(Rubylike.is_defined === false);
 Rubylike(function(R){

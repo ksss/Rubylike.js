@@ -14,7 +14,7 @@ function newTest () {
 	if (Rubylike.is_defined) {
 		assert.ok(Hash.new() instanceof Hash);
 		assert.deepEqual(Hash.new(), new Object());
-		assert.deepEqual(Hash.new(nil), {});
+		assert.deepEqual(Hash.new(null), {});
 		assert.deepEqual(Hash.new(10), {});
 		assert.deepEqual(Hash.new("a"), {});
 		assert.deepEqual(Hash.new(/\d/), {});
@@ -244,25 +244,36 @@ function equalTest () {
 		assert.ok(hash.equal(hash));
 	}
 },
-// function fetchTest() {
-// 	var hash = {"foo":123};
-// 	if (Rubylike.is_defined) {
-// 		hash = Hash.new(hash);
-// 		assert.ok(hash.fetch("foo") === 123);
-// 		assert.ok(hash.fetch("bar") === null);
-// 		assert.ok(hash.fetch("bar", "error") === "error");
-// 		assert.ok(hash.fetch("bar", function(key){ return key+" not exist"}) === "bar not exist");
-// 		assert.ok(hash.fetch("bar", function(key){ return key+" not exist"}) === "bar not exist");
-// 	} else {
-// 		hash = Rubylike.Hash.new(hash);
-// 	}
-// },
-function () {
-	var hash = {};
+
+function fetchTest () {
+	var hash = {"foo":123};
 	if (Rubylike.is_defined) {
 		hash = Hash.new(hash);
 	} else {
 		hash = Rubylike.Hash.new(hash);
+	}
+	assert.ok(hash.fetch("foo") === 123);
+	assert.ok(hash.fetch("bar") === null);
+	assert.ok(hash.fetch("bar", "error") === "error");
+	assert.ok(hash.fetch("bar", function(key){ return key+" not exist"}) === "bar not exist");
+},
+
+function flattenTest () {
+	var hash = {1:"one",2:[2,"two"],3:"three"};
+	if (Rubylike.is_defined) {
+		hash = Hash.new(hash);
+		assert.deepEqual(hash.flatten(), [1,"one",2,[2,"two"],3,"three"]);
+		assert.deepEqual(hash.flatten(1), [1,"one",2,[2,"two"],3,"three"]);
+		assert.deepEqual(hash.flatten(2), [1,"one",2,2,"two",3,"three"]);
+		assert.deepEqual(hash.flatten(0), [[1,"one"],[2,[2,"two"]],[3,"three"]]);
+		assert.deepEqual(hash.flatten(-1), [1,"one",2,2,"two",3,"three"]);
+	} else {
+		hash = Rubylike.Hash.new(hash);
+		assert.deepEqual(hash.flatten().to_a(), [1,"one",2,[2,"two"],3,"three"]);
+		assert.deepEqual(hash.flatten(1).to_a(), [1,"one",2,[2,"two"],3,"three"]);
+		assert.deepEqual(hash.flatten(2).to_a(), [1,"one",2,2,"two",3,"three"]);
+		assert.deepEqual(hash.flatten(0).map(to_a).to_a(), [[1,"one"],[2,[2,"two"]],[3,"three"]]);
+		assert.deepEqual(hash.flatten(-1).to_a(), [1,"one",2,2,"two",3,"three"]);
 	}
 },
 function () {
