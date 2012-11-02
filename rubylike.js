@@ -151,6 +151,8 @@ Rubylike.def(Rubylike.Object, {
 		var ka, kb, key, keysa, keysb;
 		if (a === b) {
 			return true;
+		} else if (a === null || a === undefined || b === null || b === undefined) {
+			return false;
 		} else if (a.prototype !== b.prototype) {
 			return false;
 		} else if (a.valueOf() === b.valueOf()) {
@@ -1410,12 +1412,94 @@ Rubylike.Hash.def({
 	first: function () {
 		return this.to_a()[0];
 	},
+	has_key: function (key) {
+		return this.hasOwnProperty(key);
+	},
+	has_value: function (value) {
+		return this.key(value) !== null;
+	},
+	invert: function () {
+		var hash = Rubylike.Hash['new']();
+		for (var key in this) if (this.hasOwnProperty(key)) {
+			var value = this[key];
+			hash[value] = key;
+		}
+		return hash;
+	},
+	inject: function () {
+		var sum, callback;
+		if (arguments.length === 1) {
+			sum = this.to_a()[0];
+			this.shift();
+		} else if (arguments.length === 2) {
+			sum = arguments[0];
+		}
+		callback = arguments[arguments.length - 1];
+		this.each(function(i){
+			sum = callback(sum, i);
+		});
+		return sum;
+	},
+	keep_if: function (block) {
+		for (var key in this) if (this.hasOwnProperty(key)) {
+			var value = this[key];
+			if (!block(key, value)) delete this[key];
+		}
+		return this;
+	},
+	keys: function () {
+		return Object.keys(this);
+	},
+	key: function (value) {
+		for (var key in this) if (this.hasOwnProperty(key)) {
+			if (Rubylike.Object.eql(this[key], value)) return key;
+		}
+		return null;
+	},
+	length: function () {
+		var count = 0;
+		for (var key in this) if (this.hasOwnProperty(key)) {
+			count += 1;
+		}
+		return count;
+	},
 	map: function (block) {
 		var clone = Rubylike.Hash['new']();
 		for (var key in this) if (this.hasOwnProperty(key)) {
 			clone[key] = block(this[key]);
 		}
 		return clone;
+	},
+	merge: function (other, block) {
+		var self, key;
+		self = Rubylike.Hash['new'](this); // self clone
+		try {
+			if (!other instanceof Object) other = other.to_hash();
+		} catch (ex) {
+			Rubylike.raise('TypeError', "'merge`: can't convert " + className(other) + " into Hash");
+		}
+		if (arguments.length === 1) {
+			for (key in other) if (other.hasOwnProperty(key)) {
+				self[key] = other[key];
+			}
+		} else {
+			for (key in other) if (other.hasOwnProperty(key)) {
+				if (self.hasOwnProperty(key)) {
+					self[key] = block(key, self[key], other[key]);
+				} else {
+					self[key] = other[key];
+				}
+			}
+		}
+		return self;
+	},
+	select: function (block) {
+		var hash = Rubylike.Hash['new']();
+		for (var key in this) if (this.hasOwnProperty(key)) {
+			var value = this[key];
+			if (block(key, value)) hash[key] = value;
+		}
+		return hash;
 	},
 	shift: function () {
 		var first = this.first();
@@ -1434,60 +1518,18 @@ Rubylike.Hash.def({
 	to_hash: function () {
 		return Rubylike.Hash['new'](this);
 	},
-	inject: function () {
-		var sum, callback;
-		if (arguments.length === 1) {
-			sum = this.to_a()[0];
-			this.shift();
-		} else if (arguments.length === 2) {
-			sum = arguments[0];
-		}
-		callback = arguments[arguments.length - 1];
-		this.each(function(i){
-			sum = callback(sum, i);
-		});
-		return sum;
-	},
-	keys: function () {
-		return Object.keys(this);
-	},
-	key: function (value) {
-		for (var key in this) if (this.hasOwnProperty(key)) {
-			if (this[key] === value) return key;
-			if (Rubylike.Hash.prototype.eql.call(this[key], value)) return key;
-		}
-		return null;
-	},
-	length: function () {
-		var count = 0;
-		for (var key in this) if (this.hasOwnProperty(key)) {
-			count += 1;
-		}
-		return count;
-	},
-	merge: function (other, block) {
-		var self, key;
-		self = Rubylike.Hash['new'](this); // self clone
-		try {
-			if (!other instanceof Object) other = other.to_hash();
-		} catch (ex) {
-			Rubylike.raise('TypeError', "'merge`: can't convert " + className(other) + " into Hash");
-		}
-		if (arguments.length === 1) {
-			for (key in other) if (other.hasOwnProperty(key)) {
-				self[key] = other[key];
-			}
-		} else {
-			for (key in other) if (other.hasOwnProperty(key)) {
-				self[key] = block(key, self[key], other[key]);
-			}
-		}
-		return self;
+	to_s: function () {
+		return JSON.stringify(this);
 	}
 });
 Rubylike.Hash.prototype.each_pair = Rubylike.Hash.prototype.each;
 Rubylike.Hash.prototype.dup = Rubylike.Hash.prototype.clone;
 Rubylike.Hash.prototype.size = Rubylike.Hash.prototype.length;
+Rubylike.Hash.prototype.include = Rubylike.Hash.prototype.has_key;
+Rubylike.Hash.prototype.member = Rubylike.Hash.prototype.has_key;
+Rubylike.Hash.prototype.value = Rubylike.Hash.prototype.has_value;
+Rubylike.Hash.prototype.index = Rubylike.Hash.prototype.key;
+Rubylike.Hash.prototype.inspect = Rubylike.Hash.prototype.to_s;
 // }}}
 
 // {{{ String
