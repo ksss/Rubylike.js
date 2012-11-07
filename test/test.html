@@ -4,40 +4,9 @@
 </style>
 <script type="text/javascript" src="../rubylike.js"></script>
 <script type="text/javascript" src="../test/test_array.js"></script>
+<script type="text/javascript" src="../test/test_hash.js"></script>
 <script type="text/javascript">
-var eql = function (a, b) {
-	var ka, kb, key, keysa, keysb;
-	if (a === b) {
-		return true;
-	} else if (a.valueOf() === b.valueOf()) {
-		return true;
-	} else if (a instanceof Date && b instanceof Date) {
-		return a.getTime() === b.getTime();
-	} else if (typeof a != 'object' && typeof b != 'object') {
-		return a === b;
-	}
-
-	try {
-		keysa = Object.keys(a);
-		keysb = Object.keys(b);
-	} catch (ex) {
-		return false;
-	}
-	if (keysa.length !== keysb.length) return false;
-	keysa.sort();
-	keysb.sort();
-	for (var i = 0, len = keysa.length; i < len; i += 1) {
-		if (keysa[i] !== keysb[i]) return false;
-	}
-	for (key in a) if (a.hasOwnProperty(key)) {
-		if (typeof a[key] === 'object') {
-			return eql(a[key], b[key]);
-		} else if (a[key] !== b[key]) {
-			return false;
-		}
-	}
-	return true;
-};
+var eql = Rubylike.Object.eql;
 function assert () {
 }
 assert.ok = function (value, message) {
@@ -47,7 +16,9 @@ assert.strictEqual = function (actual, expected, message) {
 	assert.ok(actual === expected, message);
 };
 assert.deepEqual = function (actual, expected, message) {
+	if (message === 'miss') console.log(message)
 	if (!eql(actual, expected)) {
+		console.log(111111111111)
 		throw new Error (message);
 	}
 };
@@ -66,11 +37,28 @@ window.onload = function(){
 	console.time('test');
 	try {
 		var testCase = [].concat(
-			this.testCase.Array
+				this.testCase.Array,
+				this.testCase.Hash
 		);
 		Array.prototype.foo = function () {return [3,2,1]};
 		Array.prototype._foo = function () {return [3,2,1]};
 
+function foo () {
+};
+function bar () {
+	foo();
+};
+var len = 100000000;
+console.time('a');
+for (i = 0; i < len; i++) {
+	foo();
+}
+console.timeEnd('a');
+console.time('b');
+for (i = 0; i < len; i++) {
+	bar();
+}
+console.timeEnd('b');
 		assert.ok(typeof Rubylike === 'function');
 		assert.throws(function(){ Rubylike() });
 		assert.ok(1 < Rubylike.Array.new().methods().length);

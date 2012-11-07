@@ -1,14 +1,34 @@
-Array => 終了
-Enumerator => 利点はnextとwith_index => 今のところなしで
-Enumerable => Arrayとしてできるだけ実装 => chunk意外終了
-
-Hash#defaultは仕様的に実装不能
-HashオブシェクトはHash.new()で作成する
-  メリット: Objectを汚さず他のオブジェクトにも影響を与えない
-  デメリット: リテラル表記ができない
-
+基本方針:
 基本的にjavascriptで実現できないrubyの機能は無理に実装しない方針
 Rubyにfooメソッドとfoo!メソッドがある場合fooのみとする。引数次第で変化させてもいいかもしれない。
 fooメソッドとfoo?メソッドがあった場合fooのみとする
 foo?のみの場合fooとして扱う
 
+未決定:
+to_aはRubylike.Arrayを返すべきか?Arrayを返すべきか?
+nullとundefinedの扱いはRubyよりにするかJavaScriptよりにするか
+  -> 現状nullで統一
+  -> JavaScriptよりで統一したい
+    -> あくまでコンセプトは"rubyのメソッドが使えるJavaScript"
+
+JavaScript仕様:
+objectは代入した瞬間に自動的にソートされる
+objectのキーをNumberにすると、自動的にStringに変換される
+
+rubylike.js仕様:
+Enumeratorはeachを使用せずto_aを使用する
+  -> javascriptの仕様上途中でループを抜けることができないため
+
+書式:
+  ruby:
+  [1,2,3].each do |i|
+    print i
+  end
+  
+  rubylike.js:
+  [1,2,3].each(function(i){
+    console.log(i);
+  });
+
+node assertモジュール仕様
+assert.deepEqualは == 比較
